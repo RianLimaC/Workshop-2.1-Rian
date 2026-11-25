@@ -1,3 +1,4 @@
+
 const VALOR_BASE = 100.0;
 const DESCONTO_ESTUDANTE = 0.20;
 
@@ -14,9 +15,11 @@ const inscritos = [];
 
 function calcularValorInscricao(isEstudante) {
 
+  // Correção BUG 01 - Desconto de estudante
   if (isEstudante) {
-    return VALOR_BASE * (1 + DESCONTO_ESTUDANTE);
+    return VALOR_BASE * (1 - DESCONTO_ESTUDANTE);
   }
+
   return VALOR_BASE;
 }
 
@@ -30,15 +33,28 @@ function formatarMoeda(valor) {
 function atualizarInterface() {
   totalInscritosEl.textContent = inscritos.length;
 
+  // Correção BUG 03 - Total arrecadado
+  let total = 0;
+
+  for (let i = 0; i < inscritos.length; i++) {
+    total += inscritos[i].valor;
+  }
+
+  totalArrecadadoEl.textContent = formatarMoeda(total);
+
   listaInscritosEl.innerHTML = "";
+
   inscritos.forEach((item) => {
     const li = document.createElement("li");
-    const tagEstudante = item.estudante ? "Estudante" : "Padrão";
+
+    const tagEstudante = item.estudante 
+      ? "Estudante" 
+      : "Padrão";
+
     li.textContent = `${item.nome} (${item.idade} anos) — ${tagEstudante} — ${formatarMoeda(item.valor)}`;
+
     listaInscritosEl.appendChild(li);
   });
-
-
 }
 
 form.addEventListener("submit", (event) => {
@@ -54,7 +70,15 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
+  // Correção BUG 02 - Validação da idade mínima
+  if (!Number.isInteger(idade) || idade < 16) {
+    mensagemEl.textContent = "A idade mínima é de 16 anos.";
+    mensagemEl.className = "mensagem erro";
+    return;
+  }
+
   const valor = calcularValorInscricao(estudante);
+
   inscritos.push({ nome, idade, estudante, valor });
 
   atualizarInterface();
